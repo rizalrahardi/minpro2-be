@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Account Verification</title>
+		<style>
+			a {
+				text-decoration: none;
+				color: white !important;
+				padding: 7px 13px;
+				border-radius: 5px;
+				background-color: #6528f7;
+				margin: 20px 0px;
+			}
+			a:hover {
+				background-color: #5917f3;
+			}
+		</style>
+	</head>
+	<body>
+		<h>Halo {{username}}</h>
+		<p>silahkan klik tombol dibawah untuk melakukan verifikasi akun anda</p>
+		<a href="http://localhost:3000/verify/{{token}}">Verifikasi Akun</a>
+	</body>
+</html>
