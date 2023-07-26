@@ -33,6 +33,11 @@ const authController = {
 			const user = await User.findOne({
 				where: { email },
 			});
+			if (!user) {
+				return res.status(400).json({
+					message: "email tidak terdaftar",
+				});
+			}
 			const token = await utils.generateToken(user.id);
 
 			await emailService.sendForgotPasswordEmail(user, token);
@@ -53,9 +58,16 @@ const authController = {
 			const { password, confirmPassword } = req.body;
 			const { id } = req.User;
 			const user = await User.findByPk(id);
-			await utils.checkPassword(res, password, confirmPassword);
+			const passwordMatch = await utils.checkPassword(
+				password,
+				confirmPassword
+			);
+			if (!passwordMatch) {
+				return res.status(400).json({
+					message: "confirm password tidak sesuai",
+				});
+			}
 			const hashPass = await utils.hashedPassword(password);
-
 			await db.sequelize.transaction(async (t) => {
 				await user.update(
 					{

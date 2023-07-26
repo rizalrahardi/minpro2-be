@@ -19,10 +19,8 @@ const decodedToken = async (token) => {
 	return await jwt.verify(token, process.env.JWT_SECRET);
 };
 
-const checkPassword = async (res, password, confirmPassword) => {
-	if (password !== confirmPassword) {
-		return res.status(400).json({ message: "Password tidak sesuai" });
-	}
+const checkPassword = async (password, confirmPassword) => {
+	return password === confirmPassword;
 };
 
 module.exports = {

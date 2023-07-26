@@ -78,6 +78,7 @@ const blogController = {
 		try {
 			const { id } = req.User;
 			const blogs = await Blog.findAll({
+				where: { userId: id },
 				attributes,
 				include,
 			});
