@@ -1,32 +1,24 @@
 const { User, Blog, Category, Country } = require("../models");
 const { Op } = require("sequelize");
+const { blogService } = require("../services");
+
+const attributes = blogService.setAttributes();
+const include = blogService.setInclude();
+
 const blogController = {
 	createBlog: async (req, res) => {
 		try {
 			const { title, content, videoUrl, keywords, categoryId, countryId } =
 				req.body;
 			const userId = req.User.id;
-			console.log(userId); // Mengambil userId dari token yang terverifikasi melalui middleware
-
-			// Cek apakah user dengan userId yang diberikan ada dalam database
-			const user = await User.findByPk(userId);
-			if (!user) {
-				return res.status(404).json({ message: "User tidak ditemukan" });
-			}
-
-			// Cek apakah category dengan categoryId yang diberikan ada dalam database
 			const category = await Category.findByPk(categoryId);
 			if (!category) {
 				return res.status(404).json({ message: "Category tidak ditemukan" });
 			}
-
-			// Cek apakah country dengan countryId yang diberikan ada dalam database
 			const country = await Country.findByPk(countryId);
 			if (!country) {
 				return res.status(404).json({ message: "Country tidak ditemukan" });
 			}
-
-			// Buat blog baru
 			const newBlog = await Blog.create({
 				title,
 				content,
@@ -48,14 +40,6 @@ const blogController = {
 	},
 
 	getAllBlogs: async (req, res) => {
-		const setPagination = (page, limit) => {
-			const offset = (page - 1) * limit;
-			return {
-				offset,
-				limit: parseInt(limit),
-			};
-		};
-
 		const {
 			title,
 			categoryId,
@@ -65,24 +49,18 @@ const blogController = {
 			limit = 10,
 		} = req.query;
 
+		const pagination = blogService.setPagination(page, limit);
+
 		const whereClause = {};
 		if (title) whereClause.title = { [Op.like]: `%${title}%` };
 		if (categoryId) whereClause.categoryId = categoryId;
 		if (countryId) whereClause.countryId = countryId;
 
-		const pagination = setPagination(page, limit);
-
-		// console.log(page, limit);
-
 		try {
 			const blog = await Blog.findAll({
-				attributes: { exclude: ["userId", "categoryId", "countryId"] },
+				attributes,
+				include,
 				where: whereClause,
-				include: [
-					{ model: User, attributes: ["username", "imgProfile"], as: "author" },
-					Category,
-					Country,
-				],
 				order: [["createdAt", orderBy === "asc" ? "ASC" : "DESC"]],
 				...pagination,
 			});
@@ -97,12 +75,8 @@ const blogController = {
 		const { id } = req.params;
 		try {
 			const blog = await Blog.findByPk(id, {
-				attributes: { exclude: ["userId", "categoryId", "countryId"] },
-				include: [
-					{ model: User, attributes: ["username", "imgProfile"], as: "author" },
-					Category,
-					Country,
-				],
+				attributes,
+				include,
 			});
 			if (!blog) {
 				return res.status(404).json({ message: "Blog tidak ditemukan" });
@@ -115,6 +89,25 @@ const blogController = {
 				"Error pada proses mendapatkan blog berdasarkan ID:",
 				error
 			);
+			return res.status(500).json({ message: "Terjadi kesalahan pada server" });
+		}
+	},
+
+	getBlogByUser: async (req, res) => {
+		try {
+			const { id } = req.User;
+			const blogs = await Blog.findAll({
+				where: {
+					id: id,
+				},
+				attributes,
+				include,
+			});
+			return res.status(200).json({
+				message: "data berhasil didapatkan",
+				data: blogs,
+			});
+		} catch (error) {
 			return res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},

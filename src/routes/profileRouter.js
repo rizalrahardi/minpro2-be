@@ -4,6 +4,7 @@ const { profileController } = require("../controllers");
 const { multerUpload } = require("../middlewares/multer");
 const errorValidate = require("../middlewares/errorValidate");
 const keepLogin = require("../middlewares/keepLogin");
+const { validateProfile } = require("../services");
 
 router.get("/user", verifyToken, keepLogin, profileController.getUser);
 router.get("/users", verifyToken, keepLogin, profileController.getAllUsers);
@@ -12,6 +13,8 @@ router.patch(
 	verifyToken,
 	isVerified,
 	keepLogin,
+	validateProfile.changeUsernameRules,
+	errorValidate,
 	profileController.changeUsername
 );
 router.patch(
@@ -19,6 +22,8 @@ router.patch(
 	verifyToken,
 	isVerified,
 	keepLogin,
+	validateProfile.changePasswordRules,
+	errorValidate,
 	profileController.changePassword
 );
 router.patch(
@@ -26,6 +31,8 @@ router.patch(
 	verifyToken,
 	isVerified,
 	keepLogin,
+	validateProfile.changeEmailRules,
+	errorValidate,
 	profileController.changeEmail
 );
 router.patch(
@@ -33,6 +40,8 @@ router.patch(
 	verifyToken,
 	isVerified,
 	keepLogin,
+	validateProfile.changePhoneRules,
+	errorValidate,
 	profileController.changePhone
 );
 router.patch(

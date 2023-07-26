@@ -20,7 +20,6 @@ const verifyToken = async (req, res, next) => {
 		}
 
 		req.User = verifiedUser;
-		console.log(req.User);
 		next();
 	} catch (err) {
 		return res.status(400).send("Invalid Token");

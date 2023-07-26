@@ -108,4 +108,42 @@ const loginRules = [
 		}),
 ];
 
-module.exports = { registerRules, loginRules };
+const forgotPassEmailRules = [
+	body("email")
+		.notEmpty()
+		.isEmail()
+		.withMessage("Email harus di isi atau Email tidak valid")
+		.custom(async (value, { req }) => {
+			const user = await User.findOne({ where: { email: value } });
+			if (!user) {
+				throw new Error("Email salah atau tidak terdaftar");
+			}
+			req.user = user;
+		}),
+];
+
+const resetPasswordRules = [
+	body("password")
+		.notEmpty()
+		.isLength({ min: 6 })
+		.matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$/)
+		.withMessage(
+			"Password harus harus di isi minimal 6 karakter, mengandung angka, huruf kapital, dan simbol"
+		),
+	body("confirmPassword")
+		.notEmpty()
+		.withMessage("Konfirmasi password harus diisi")
+		.custom((value, { req }) => {
+			if (value !== req.body.password) {
+				throw new Error("Konfirmasi password tidak sesuai dengan password");
+			}
+			return true;
+		}),
+];
+
+module.exports = {
+	registerRules,
+	loginRules,
+	forgotPassEmailRules,
+	resetPasswordRules,
+};

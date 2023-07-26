@@ -16,9 +16,7 @@ app.use("/api/auth", authRouter);
 app.use("/api", blogRouter);
 app.use("/api/profile", profileRouter);
 
-app.get("/", (req, res) => {
-	res.json({ message: "Hello World!" });
-});
+app.use("/public", express.static(path.resolve(__dirname, "../public")));
 
 app.listen(PORT, () => {
 	console.log("Server running on port " + PORT);
