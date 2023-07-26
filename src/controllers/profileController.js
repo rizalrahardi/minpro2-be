@@ -1,11 +1,11 @@
 const db = require("../models");
 const User = db.User;
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const {
 	sendNotificationEmail,
 	sendVerificationEmail,
 } = require("../services/emailService");
+const { generateToken } = require("../services/utils");
 
 const profileController = {
 	getAllUsers: async (req, res) => {
@@ -20,8 +20,8 @@ const profileController = {
 	getUser: async (req, res) => {
 		const newToken = res.locals.newToken;
 		try {
-			const userId = req.User.id;
-			const user = await User.findByPk(userId);
+			const { id } = req.User;
+			const user = await User.findByPk(id);
 			if (user) {
 				return res
 					.status(200)
@@ -36,16 +36,12 @@ const profileController = {
 	changeUsername: async (req, res) => {
 		try {
 			const { username } = req.body;
-			const userId = req.User.id;
-			const user = await User.findByPk(userId);
-			// const isExist = await User.findOne({ where: { username } });
-			// if (isExist) {
-			// 	return res.status(400).json({ message: "Username sudah digunakan" });
-			// }
+			const { id } = req.User;
+			const user = await User.findByPk(id);
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{ username },
-					{ where: { id: userId } },
+					{ where: { id: id } },
 					{ transaction: t }
 				);
 				await sendNotificationEmail(user, "username");
@@ -58,30 +54,20 @@ const profileController = {
 	},
 	changePassword: async (req, res) => {
 		try {
-			const { currentPassword, newPassword, confirmPassword } = req.body;
-			const userId = req.User.id;
-			const user = await User.findByPk(userId);
-			if (!user) {
-				return res.status(404).json({ message: "User tidak ditemukan" });
-			}
-			const isPassMatch = await bcrypt.compare(currentPassword, user.password);
-			if (!isPassMatch) {
-				return res.status(400).json({ message: "Password tidak sesuai" });
-			}
-			if (newPassword !== confirmPassword) {
-				return res
-					.status(400)
-					.json({ message: "Konfirmasi password tidak sesuai" });
-			}
+			const { newPassword } = req.body;
+			const { id } = req.User;
+			const user = await User.findByPk(id);
 			const hashedPassword = await bcrypt.hash(newPassword, 10);
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{ password: hashedPassword },
-					{ where: { id: userId } },
+					{ where: { id: id } },
 					{ transaction: t }
 				);
 				await sendNotificationEmail(user, "password");
-				res.status(200).json({ message: "Password berhasil diubah" });
+				res.status(200).json({
+					message: `Selamat ${user.username} Password berhasil diubah`,
+				});
 			});
 		} catch (error) {
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
@@ -91,26 +77,20 @@ const profileController = {
 	changeEmail: async (req, res) => {
 		try {
 			const { email } = req.body;
-			const userId = req.User.id;
-			const isExist = await User.findOne({ where: { email } });
-			if (isExist) {
-				return res.status(400).json({ message: "Email sudah digunakan" });
-			}
+			const { id } = req.User;
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{ email, isVerified: false },
-					{ where: { id: userId } },
+					{ where: { id: id } },
 					{ transaction: t }
 				);
 
-				const user = await User.findByPk(userId);
+				const user = await User.findByPk(id);
 
-				const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-					expiresIn: "24h",
-				});
+				const token = await generateToken(id);
 				sendVerificationEmail(user, token);
 				res.status(200).json({
-					message: "Email berhasil diubah, silahkan verifikasi ulang",
+					message: `Selamat ${user.username} Email berhasil diubah, silahkan verifikasi ulang`,
 					user,
 					token,
 				});
@@ -123,19 +103,14 @@ const profileController = {
 	changePhone: async (req, res) => {
 		try {
 			const { phone } = req.body;
-			const user = await User.findByPk(req.User.id);
-			const isExist = await User.findOne({ where: { phone } });
-			if (isExist) {
-				return res.status(400).json({ message: "Phone sudah digunakan" });
-			}
+			const { id } = req.User;
+			const user = await User.findByPk(id);
 			await db.sequelize.transaction(async (t) => {
-				await User.update(
-					{ phone },
-					{ where: { id: user.id } },
-					{ transaction: t }
-				);
+				await User.update({ phone }, { where: { id: id } }, { transaction: t });
 				await sendNotificationEmail(user, "phone");
-				res.status(200).json({ message: "Phone berhasil diubah" });
+				return res
+					.status(200)
+					.json({ message: `Selamat ${user.username} Phone berhasil diubah` });
 			});
 		} catch (error) {
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
@@ -144,24 +119,23 @@ const profileController = {
 
 	changeAvatar: async (req, res) => {
 		try {
-			const userId = req.User.id;
+			const { id } = req.User;
+			const user = await User.findByPk(id);
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{
 						imgProfile: req.file.path,
 					},
-					{ where: { id: userId } },
+					{ where: { id: id } },
 					{ transaction: t }
 				);
-				const user = await User.findByPk(userId);
-
-				res.status(200).json({
+				return res.status(200).json({
 					message: "Avatar berhasil diubah",
 					user,
 				});
 			});
 		} catch (error) {
-			res.status(500).json({ message: "Terjadi kesalahan pada server" });
+			return res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
 };
