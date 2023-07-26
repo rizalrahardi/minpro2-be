@@ -1,11 +1,12 @@
 const db = require("../models");
 const User = db.User;
 const bcrypt = require("bcrypt");
-const {
-	sendNotificationEmail,
-	sendVerificationEmail,
-} = require("../services/emailService");
+// const {
+// 	sendNotificationEmail,
+// 	sendVerificationEmail,
+// } = require("../services/emailService");
 const { generateToken } = require("../services/utils");
+const { emailService } = require("../services");
 
 const profileController = {
 	getAllUsers: async (req, res) => {
@@ -44,7 +45,7 @@ const profileController = {
 					{ where: { id: id } },
 					{ transaction: t }
 				);
-				await sendNotificationEmail(user, "username");
+				await emailService.sendNotificationEmail(user, "username");
 
 				res.status(200).json({ message: "Username berhasil diubah" });
 			});
@@ -64,7 +65,7 @@ const profileController = {
 					{ where: { id: id } },
 					{ transaction: t }
 				);
-				await sendNotificationEmail(user, "password");
+				await emailService.sendNotificationEmail(user, "password");
 				res.status(200).json({
 					message: `Selamat ${user.username} Password berhasil diubah`,
 				});

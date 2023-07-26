@@ -1,4 +1,4 @@
-const { User, Blog, Category, Country } = require("../models");
+const { Blog, Category, Country } = require("../models");
 const { Op } = require("sequelize");
 const { blogService } = require("../services");
 
@@ -11,14 +11,14 @@ const blogController = {
 			const { title, content, videoUrl, keywords, categoryId, countryId } =
 				req.body;
 			const userId = req.User.id;
-			const category = await Category.findByPk(categoryId);
-			if (!category) {
-				return res.status(404).json({ message: "Category tidak ditemukan" });
-			}
-			const country = await Country.findByPk(countryId);
-			if (!country) {
-				return res.status(404).json({ message: "Country tidak ditemukan" });
-			}
+			// const category = await Category.findByPk(categoryId);
+			// if (!category) {
+			// 	return res.status(404).json({ message: "Category tidak ditemukan" });
+			// }
+			// const country = await Country.findByPk(countryId);
+			// if (!country) {
+			// 	return res.status(404).json({ message: "Country tidak ditemukan" });
+			// }
 			const newBlog = await Blog.create({
 				title,
 				content,
