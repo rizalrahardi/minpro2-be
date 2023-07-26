@@ -30,4 +30,5 @@ router.patch(
 	authController.resetPassword
 );
 router.patch("/verify", verifyToken, authController.activateAccount);
+router.get("/keep-login", verifyToken, authController.keepLogin);
 module.exports = router;

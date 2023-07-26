@@ -1,12 +1,9 @@
 const db = require("../models");
 const User = db.User;
 const bcrypt = require("bcrypt");
-// const {
-// 	sendNotificationEmail,
-// 	sendVerificationEmail,
-// } = require("../services/emailService");
 const { generateToken } = require("../services/utils");
 const { emailService } = require("../services");
+const fs = require("fs");
 
 const profileController = {
 	getAllUsers: async (req, res) => {
@@ -46,7 +43,6 @@ const profileController = {
 					{ transaction: t }
 				);
 				await emailService.sendNotificationEmail(user, "username");
-
 				res.status(200).json({ message: "Username berhasil diubah" });
 			});
 		} catch (error) {
@@ -79,15 +75,13 @@ const profileController = {
 		try {
 			const { email } = req.body;
 			const { id } = req.User;
+			const user = await User.findByPk(id);
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{ email, isVerified: false },
 					{ where: { id: id } },
 					{ transaction: t }
 				);
-
-				const user = await User.findByPk(id);
-
 				const token = await generateToken(id);
 				sendVerificationEmail(user, token);
 				res.status(200).json({
@@ -122,6 +116,10 @@ const profileController = {
 		try {
 			const { id } = req.User;
 			const user = await User.findByPk(id);
+			const oldAvatar = user.imgProfile;
+			if (oldAvatar) {
+				await fs.unlinkSync(oldAvatar);
+			}
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{

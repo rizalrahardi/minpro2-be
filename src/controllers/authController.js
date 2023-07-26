@@ -33,11 +33,6 @@ const authController = {
 			const user = await User.findOne({
 				where: { email },
 			});
-			// if (!user) {
-			// 	return res
-			// 		.status(404)
-			// 		.json({ message: "User tidak ditemukan, pastikan emailmu benar" });
-			// }
 			const token = await utils.generateToken(user.id);
 
 			await emailService.sendForgotPasswordEmail(user, token);
@@ -86,12 +81,12 @@ const authController = {
 			const user = await User.findByPk(id);
 			if (user.isVerified) {
 				return res.status(400).json({
-					message: "verifikasi gagal, akunmu sudah terverifikasi",
+					message: "verifikasi gagal, akun anda sudah terverifikasi",
 				});
 			}
 			await user.update({ isVerified: true });
 			return res.status(200).json({
-				message: "verifikasi akun berhasil",
+				message: `selamat ${user.username} verifikasi akun berhasil`,
 			});
 		} catch (error) {
 			console.log(error);
@@ -106,6 +101,20 @@ const authController = {
 			const token = await utils.generateToken(user.id);
 
 			return res.status(200).json({ message: "login berhasil", user, token });
+		} catch (err) {
+			return res
+				.status(500)
+				.json({ message: "login gagal", error: err.message });
+		}
+	},
+	keepLogin: async (req, res) => {
+		try {
+			const { id } = req.User;
+			const user = await User.findByPk(id);
+			const token = await utils.generateToken(user.id);
+			return res
+				.status(200)
+				.json({ message: "berhasil mendapat token baru", user, token });
 		} catch (err) {
 			return res
 				.status(500)

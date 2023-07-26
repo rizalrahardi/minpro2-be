@@ -1,5 +1,6 @@
 const { blogController } = require("../controllers");
 const { verifyToken, isVerified } = require("../middlewares/auth");
+const errorValidate = require("../middlewares/errorValidate");
 const { multerUpload } = require("../middlewares/multer");
 const { validateBlog } = require("../services");
 
@@ -11,8 +12,9 @@ router.post(
 	"/blog",
 	verifyToken,
 	isVerified,
-	validateBlog.createBlogRules,
 	multerUpload.single("imgBlog"),
+	validateBlog.createBlogRules,
+	errorValidate,
 	blogController.createBlog
 );
 

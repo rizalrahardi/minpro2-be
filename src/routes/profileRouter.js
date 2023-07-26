@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { verifyToken, isVerified } = require("../middlewares/auth");
-const { profileController } = require("../controllers");
-const { multerUpload } = require("../middlewares/multer");
+const { profileController, blogController } = require("../controllers");
+const { multerUpload, handleFileSizeError } = require("../middlewares/multer");
 const errorValidate = require("../middlewares/errorValidate");
 const keepLogin = require("../middlewares/keepLogin");
 const { validateProfile } = require("../services");
@@ -50,7 +50,9 @@ router.patch(
 	isVerified,
 	keepLogin,
 	multerUpload.single("imgProfile"),
+	handleFileSizeError,
 	profileController.changeAvatar
 );
-
+router.get("/blog", verifyToken, isVerified, blogController.getBlogByUser);
+router.delete("/blog/:id", verifyToken, isVerified, blogController.deleteBlog);
 module.exports = router;
