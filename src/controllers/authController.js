@@ -65,13 +65,13 @@ const authController = {
 				);
 			});
 			await emailService.sendNotificationEmail(user, "password");
-			res.status(200).json({
+			return res.status(200).json({
 				message:
 					"Password berhasil diubah, silahkan login dengan password baru",
 			});
 		} catch (error) {
 			console.log(error);
-			res.status(500).json({ message: "token invalid" });
+			return res.status(500).json({ message: "token invalid" });
 		}
 	},
 

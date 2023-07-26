@@ -75,15 +75,15 @@ const profileController = {
 		try {
 			const { email } = req.body;
 			const { id } = req.User;
-			const user = await User.findByPk(id);
 			await db.sequelize.transaction(async (t) => {
 				await User.update(
 					{ email, isVerified: false },
 					{ where: { id: id } },
 					{ transaction: t }
 				);
+				const user = await User.findByPk(id);
 				const token = await generateToken(id);
-				sendVerificationEmail(user, token);
+				await emailService.sendVerificationEmail(user, token);
 				res.status(200).json({
 					message: `Selamat ${user.username} Email berhasil diubah, silahkan verifikasi ulang`,
 					user,
@@ -91,6 +91,7 @@ const profileController = {
 				});
 			});
 		} catch (error) {
+			console.log(error);
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
@@ -102,12 +103,13 @@ const profileController = {
 			const user = await User.findByPk(id);
 			await db.sequelize.transaction(async (t) => {
 				await User.update({ phone }, { where: { id: id } }, { transaction: t });
-				await sendNotificationEmail(user, "phone");
+				await emailService.sendNotificationEmail(user, "phone");
 				return res
 					.status(200)
 					.json({ message: `Selamat ${user.username} Phone berhasil diubah` });
 			});
 		} catch (error) {
+			console.log(error);
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},

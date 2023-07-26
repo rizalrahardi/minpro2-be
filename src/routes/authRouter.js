@@ -1,13 +1,14 @@
 const router = require("express").Router();
 const { authController } = require("../controllers");
 const errorValidate = require("../middlewares/errorValidate");
-const { multerUpload } = require("../middlewares/multer");
+const { multerUpload, handleFileSizeError } = require("../middlewares/multer");
 const { verifyToken, isVerified } = require("../middlewares/auth");
 const keepLogin = require("../middlewares/keepLogin");
 const { validateAuth } = require("../services");
 router.post(
 	"/register",
 	multerUpload.single("imgProfile"),
+	handleFileSizeError,
 	validateAuth.registerRules,
 	errorValidate,
 	authController.register
