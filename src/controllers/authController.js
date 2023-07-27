@@ -22,7 +22,6 @@ const authController = {
 				token: token,
 			});
 		} catch (error) {
-			console.log(error);
 			return res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
@@ -48,7 +47,6 @@ const authController = {
 				token,
 			});
 		} catch (error) {
-			console.log(error);
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
@@ -82,7 +80,6 @@ const authController = {
 					"Password berhasil diubah, silahkan login dengan password baru",
 			});
 		} catch (error) {
-			console.log(error);
 			return res.status(500).json({ message: "token invalid" });
 		}
 	},
@@ -101,7 +98,6 @@ const authController = {
 				message: `selamat ${user.username} verifikasi akun berhasil`,
 			});
 		} catch (error) {
-			console.log(error);
 			return res.status(400).json({ message: "Token tidak valid" });
 		}
 	},

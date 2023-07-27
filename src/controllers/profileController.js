@@ -91,7 +91,6 @@ const profileController = {
 				});
 			});
 		} catch (error) {
-			console.log(error);
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
@@ -109,7 +108,6 @@ const profileController = {
 					.json({ message: `Selamat ${user.username} Phone berhasil diubah` });
 			});
 		} catch (error) {
-			console.log(error);
 			res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},

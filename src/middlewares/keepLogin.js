@@ -11,12 +11,10 @@ const keepLogin = (req, res, next) => {
 			if (err) {
 				return next();
 			}
-
 			const currentTime = Date.now() / 1000;
 			const tokenExp = decodedToken.exp;
 			const timeUntilExpire = tokenExp - currentTime;
 			const FIVE_MINUTES = 5 * 60;
-
 			if (timeUntilExpire <= FIVE_MINUTES) {
 				const newToken = jwt.sign(
 					{ userId: decodedToken.userId },

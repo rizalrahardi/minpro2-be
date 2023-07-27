@@ -24,7 +24,6 @@ const blogController = {
 				.status(201)
 				.json({ message: "Blog berhasil dibuat", blog: newBlog });
 		} catch (error) {
-			console.error("Error pada proses pembuatan blog:", error);
 			return res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
@@ -105,7 +104,6 @@ const blogController = {
 			await blog.destroy();
 			return res.status(200).json({ message: "Blog berhasil dihapus" });
 		} catch (error) {
-			console.log(error);
 			return res.status(500).json({ message: "Terjadi kesalahan pada server" });
 		}
 	},
